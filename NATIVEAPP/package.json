@@ -8,7 +8,8 @@
   },
   "dependencies": {
     "buffer": "^5.2.1",
-    "expo": "^33.0.0",
+    "expo": "^33.0.7",
+    "expo-cli": "^3.2.3",
     "expo-permissions": "^5.0.1",
     "firebase": "^7.0.0",
     "moment": "^2.23.0",
