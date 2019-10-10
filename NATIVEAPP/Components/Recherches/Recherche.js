@@ -60,7 +60,7 @@ class Recherche extends React.Component {
       //     isLoading: false,
       //     commandes: result,
       //     screen: 'list'
-      //   });
+      //   }); 
       //  });
 
     } catch (error) {

@@ -15,7 +15,8 @@ class Commande extends React.Component {
         telephone: "",
         lastname:"",
         mail:"",
-        date: new Date().toISOString().slice(0, 10)
+        date: new Date().toISOString().slice(0, 10),
+        ClientId:""
     };
 
 
@@ -30,44 +31,61 @@ class Commande extends React.Component {
 
         const { name,  telephone, lastname, mail,  } = this.state
         try {
-            this.props.getDataBase()
-            .ref("Clients")
+
+            this.props.firebase.getDataBase()
+            .ref(`Clients`)
             .orderByChild("telephone")
-            .equalTo(telephone)
+            .equalTo(this.state.telephone)
             .once('value',(snapshot) =>{
-                console.log(snapshot.val())
                 if(snapshot.val() !== null) {
-                    var obj = snapshot.val()
-                    var result = Object.keys(obj).map(function(key){
-                        console.log(obj[key])
-                       // return obj[key]
+                    console.log("old Client")
+                    this.setState({
+                        isLoading: false,
+                        ClientId: telephone
                     });
+                    
                 }
                 else {
+                    if(this.state.telephone !== ""){
+
+                    
                     console.log("newClient")
+                    // console.log("second part")
+                    this.props.firebase.getDataBase()
+                    .ref(`Clients/${this.state.telephone}`)
+                    .set({
+                        name, lastname, telephone, mail
+                    })
+                    .then(() => {
+                        console.log(name + ' ' +  telephone + ' client insert ')
+                        this.setState({ 
+                            isLoading: false,
+                            ClientId: telephone
+                        });
+                        alert('Client Ajouter ' + name + ' '  + telephone)
+                    })
+                    .catch(error => {
+                        alert('Error1:', error.toString())
+                        this.setState({ isLoading: false });
+                    })
                     
                     }
+                    else{
+                        this.setState({
+                            isLoading:false
+                        });
                 }
-            );
-            console.log("second part")
-            this.props.firebase.getDataBase()
-                .ref(`Clients/${this.state.telephone}`)
-                .set({
-                    name, lastname, telephone, mail
-                })
-                .then(() => {
-                    console.log(name + ' ' +  telephone + ' client insert ')
-                    this.setState({ isLoading: false });
-                    alert('Client Ajouter ' + name + ' '  + telephone)
-                })
-                .catch(error => {
-                    alert('Error1:', error.toString())
-                    this.setState({ isLoading: false });
-                })
+                
+
+                }
+                }
+            )
+            
         } catch (error) {
             alert('Error2:', error.toString())
             this.setState({ isLoading: false });
         }
+    
  
     }
 
