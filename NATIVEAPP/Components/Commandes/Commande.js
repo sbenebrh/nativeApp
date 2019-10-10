@@ -5,7 +5,7 @@ import { Button, FormTextInput , Loading} from "../Common";
 import DatePicker from 'react-native-datepicker'
 
 import { withFirebase } from '../firebase';
-import ClientInfo from "../Client/ClientInfo";
+
 
 class Commande extends React.Component {
 
@@ -28,24 +28,44 @@ class Commande extends React.Component {
     handleValidPress = () => {
         this.setState({ isLoading: true });
 
-        const { name, date, telephone } = this.state
+        const { name,  telephone, lastname, mail,  } = this.state
         try {
+            this.props.getDataBase()
+            .ref("Clients")
+            .orderByChild("telephone")
+            .equalTo(telephone)
+            .once('value',(snapshot) =>{
+                console.log(snapshot.val())
+                if(snapshot.val() !== null) {
+                    var obj = snapshot.val()
+                    var result = Object.keys(obj).map(function(key){
+                        console.log(obj[key])
+                       // return obj[key]
+                    });
+                }
+                else {
+                    console.log("newClient")
+                    
+                    }
+                }
+            );
+            console.log("second part")
             this.props.firebase.getDataBase()
-                .ref(`commandes/${this.state.telephone}`)
+                .ref(`Clients/${this.state.telephone}`)
                 .set({
-                    name, date, telephone
+                    name, lastname, telephone, mail
                 })
                 .then(() => {
-                    console.log(name + ' ' + date + telephone + ' commandes insert ')
+                    console.log(name + ' ' +  telephone + ' client insert ')
                     this.setState({ isLoading: false });
-                    alert('Commade Ajouter ' + name + ' ' +  date + ' ' + telephone)
+                    alert('Client Ajouter ' + name + ' '  + telephone)
                 })
                 .catch(error => {
-                    Alert.alert('Error:', error.toString())
+                    alert('Error1:', error.toString())
                     this.setState({ isLoading: false });
                 })
         } catch (error) {
-            Alert.alert('Error:', error.toString())
+            alert('Error2:', error.toString())
             this.setState({ isLoading: false });
         }
  
@@ -79,7 +99,7 @@ class Commande extends React.Component {
                         value={this.state.lastname}
                         placeholder = {'prenom'}
                         placeholderTextColor="#FFF"
-                        onChangeText={(firstname) => { this.setState({ firstname }) }}
+                        onChangeText={(lastname) => { this.setState({ lastname }) }}
                     />
                     <FormTextInput
                     value={this.state.telephone}
@@ -159,6 +179,7 @@ const styles = StyleSheet.create({
         justifyContent: "space-around"
     }
 });
+
 
 
 const mapStateToProps = (state) => {

@@ -12,14 +12,14 @@ console.log(conf)
 console.log(env.authDomain)
 
 const config = {
-    apiKey: "AIzaSyBuTBItB327F5qzynf3Wd0gY7W4RqGs3Ac",
-    authDomain: "appreact-native.firebaseapp.com",
-    databaseURL: "https://appreact-native.firebaseio.com",
-    projectId: "appreact-native",
-    storageBucket: "",
-    messagingSenderId: "1026877898929",
-    appId: "1:1026877898929:web:efadd7448ba9eb9ca4a290",
-    measurementId: "G-V35DMWYM17"
+  apiKey: "AIzaSyC3jm39xD3AaEwxvUvj_Ho14boRw0rU3Uw",
+  authDomain: "auxdelicesdemaxime-ab0f2.firebaseapp.com",
+  databaseURL: "https://auxdelicesdemaxime-ab0f2.firebaseio.com",
+  projectId: "auxdelicesdemaxime-ab0f2",
+  storageBucket: "auxdelicesdemaxime-ab0f2.appspot.com",
+  messagingSenderId: "914517302372",
+  appId: "1:914517302372:web:577938922c8c99ae871371",
+  measurementId: "G-SZJYQQ2ZWS"
 };
 
 class Firebase {
@@ -51,6 +51,11 @@ class Firebase {
  firebaseSyncState = (path,state) => this.base.syncState(path,state)
  removeBindingSyncState = (theRef) =>  this.base.removeBinding(theRef)
  getDataBase = () =>  this.db
+
+  
+
+      
+
 
 
 //   doSignInWithGoogle = () =>
