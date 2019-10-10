@@ -5,6 +5,7 @@ import { Button, FormTextInput , Loading} from "../Common";
 import DatePicker from 'react-native-datepicker'
 
 import { withFirebase } from '../firebase';
+import ClientInfo from "../Client/ClientInfo";
 
 class Commande extends React.Component {
 
@@ -12,6 +13,8 @@ class Commande extends React.Component {
         isLoading : false ,
         name: "",
         telephone: "",
+        lastname:"",
+        mail:"",
         date: new Date().toISOString().slice(0, 10)
     };
 
@@ -28,7 +31,7 @@ class Commande extends React.Component {
         const { name, date, telephone } = this.state
         try {
             this.props.firebase.getDataBase()
-                .ref(`commandes/${Date.now()}`)
+                .ref(`commandes/${this.state.telephone}`)
                 .set({
                     name, date, telephone
                 })
@@ -66,6 +69,32 @@ class Commande extends React.Component {
                     <View style={styles.title}>
                         <Text style={styles.textTitle}>Passer Commande</Text>
                     </View>
+                    <FormTextInput
+                        value={this.state.name}
+                        placeholder = {'nom'}
+                        placeholderTextColor="#FFF"
+                        onChangeText={(name) => { this.setState({ name }) }}
+                    />
+                    <FormTextInput
+                        value={this.state.lastname}
+                        placeholder = {'prenom'}
+                        placeholderTextColor="#FFF"
+                        onChangeText={(firstname) => { this.setState({ firstname }) }}
+                    />
+                    <FormTextInput
+                    value={this.state.telephone}
+                    placeholder = {'telephone'}
+                    placeholderTextColor="#FFF"
+                    onChangeText={(telephone) => { this.setState({ telephone }) }}
+                    />
+                    <FormTextInput
+                        value={this.state.mail}
+                        placeholder = {'mail'}
+                        placeholderTextColor="#FFF"
+                        
+                        onChangeText={(mail) => { this.setState({ mail }) }}
+                    />
+                   
                     <View style={styles.form}>
                         <View style={styles.date}>
                             <Text style={{ color: '#ffffff', fontSize: 14, }} >Date : </Text>
@@ -82,19 +111,8 @@ class Commande extends React.Component {
                                 onDateChange={(date) => { this.setState({ date }) }}
                             />
                         </View>
-                        <FormTextInput
-                            value={this.state.password}
-                            placeholder={'le nom du client'}
-                            placeholderTextColor="#FFF"
-                            onChangeText={(name) => { this.setState({ name }) }}
-                        />
-                        <FormTextInput
-                            value={this.state.password}
-                            placeholder={'telephone'}
-                            placeholderTextColor="#FFF"
-                            onChangeText={(telephone) => { this.setState({ telephone }) }}
-                        />
 
+                      
                         <View style={styles.button}>
                             <Button label={'Nouvelle commande'} onPress={this.handleValidPress} />
                         </View>
@@ -108,9 +126,9 @@ class Commande extends React.Component {
 
 const styles = StyleSheet.create({
     container: {
-        flex: 1,
+        flex:1,
         backgroundColor: "#2f140d",
-        alignItems: "center",
+        alignItems: "stretch",
         justifyContent: "space-around"
     },
     logo: {
@@ -129,6 +147,7 @@ const styles = StyleSheet.create({
     },
     title: {
         justifyContent: "center",
+        alignItems:"center"
     },
     textTitle: {
         color: '#ffffff',

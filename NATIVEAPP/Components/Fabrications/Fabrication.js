@@ -33,7 +33,7 @@ class Fabrication extends Component {
 
 
   componentDidMount = () => {
-    console.log('<Commande/> mon level => ' + this.props.level)
+    console.log('<Fabrication/> mon level => ' + this.props.level)
 
     this.ref = this.props.firebase.firebaseSyncState(`/menu`, {
       context: this,

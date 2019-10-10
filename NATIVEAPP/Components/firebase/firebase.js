@@ -3,7 +3,13 @@ import 'firebase/auth';
 import 'firebase/database';
 import 'firebase/firestore';
 import Rebase from 're-base'
+import env from 'react-native-config';
 
+const conf = {
+  apikey:process.env.REACT_API_API_KEY
+};
+console.log(conf)
+console.log(env.authDomain)
 
 const config = {
     apiKey: "AIzaSyBuTBItB327F5qzynf3Wd0gY7W4RqGs3Ac",
@@ -14,7 +20,7 @@ const config = {
     messagingSenderId: "1026877898929",
     appId: "1:1026877898929:web:efadd7448ba9eb9ca4a290",
     measurementId: "G-V35DMWYM17"
-}
+};
 
 class Firebase {
 
