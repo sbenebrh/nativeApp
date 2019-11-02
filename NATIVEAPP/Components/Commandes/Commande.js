@@ -3,6 +3,7 @@ import { StyleSheet, View, Text } from 'react-native'
 import { connect } from 'react-redux'
 import { Button, FormTextInput , Loading} from "../Common";
 import DatePicker from 'react-native-datepicker'
+import Item from './Item'
 
 import { withFirebase } from '../firebase';
 
@@ -16,7 +17,8 @@ class Commande extends React.Component {
         lastname:"",
         mail:"",
         date: new Date().toISOString().slice(0, 10),
-        ClientId:""
+        ClientId:"",
+        items: []
     };
 
 
@@ -25,7 +27,12 @@ class Commande extends React.Component {
     }
 
 
-
+    Additem = item => {
+        const items = this.state.items
+        items.push(item)
+        this.setState({items})
+    }
+    
     handleValidPress = () => {
         this.setState({ isLoading: true });
 
@@ -149,6 +156,7 @@ class Commande extends React.Component {
                                 onDateChange={(date) => { this.setState({ date }) }}
                             />
                         </View>
+                        <Item/>
 
                       
                         <View style={styles.button}>
