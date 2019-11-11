@@ -1,5 +1,5 @@
 import React from 'react'
-import { StyleSheet, View, Text } from 'react-native'
+import { StyleSheet, View, Text , FlatList} from 'react-native'
 import { connect } from 'react-redux'
 import { Button, FormTextInput , Loading} from "../Common";
 import DatePicker from 'react-native-datepicker'
@@ -18,7 +18,8 @@ class Commande extends React.Component {
         mail:"",
         date: new Date().toISOString().slice(0, 10),
         ClientId:"",
-        items: []
+        items: [],
+        counter : 1
     };
 
 
@@ -98,8 +99,13 @@ class Commande extends React.Component {
 
 
 
-
     render() {
+
+        const afficheItems = () => {
+            Object.keys(this.state.items).map((key) => <Item key = {key} />)
+        }
+
+        console.log(this.state.counter)
         if (this.state.isLoading === true) {
             return (
                 <View style={styles.container}>
@@ -110,6 +116,7 @@ class Commande extends React.Component {
             )
         } else {
             return (
+                
                 <View style={styles.container}>
                     <View style={styles.title}>
                         <Text style={styles.textTitle}>Passer Commande</Text>
@@ -156,14 +163,15 @@ class Commande extends React.Component {
                                 onDateChange={(date) => { this.setState({ date }) }}
                             />
                         </View>
-                        <Item/>
-
-                      
+                        <View style={styles.button}>
+                        <Button label ={'ajouter article'} onPress={() => {this.setState({counter:this.state.counter + 1})}}/>
+                        </View>
+                        
+                        {afficheItems()}
                         <View style={styles.button}>
                             <Button label={'Nouvelle commande'} onPress={this.handleValidPress} />
                         </View>
                     </View>
-
                 </View>
             );
         }
