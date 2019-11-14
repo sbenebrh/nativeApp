@@ -47,9 +47,10 @@ const Items = {
 
 export default class Item extends Component {
     state = {
+        quantity: 0,
         cat:'sucree',
-        object: '',
-        quantity: 0
+        object: ''
+        
     }
 
 calculateStep = () => {
@@ -60,26 +61,34 @@ calculateStep = () => {
     }
 }
 
+handleChange = quantity => {
+    this.setState({quantity:quantity.quantity})
+    console.log(this.state.quantity )
+    this.props.onchange(this.state, this.props.index)
+}
+
     render() {
 
       const  CatItem = (
            
-            Object.keys(Items).map((obj) => <Picker.Item key = {obj} styles = 'item' label = {Items[obj].name} value = {Items[obj].name} />) 
+            Object.keys(Items).map((obj) => <Picker.Item key = {obj} color= '#fff' label = {Items[obj].name} value = {Items[obj].name} />) 
       )
         
       const Cat = this.state.cat
 
       const Articles = (
          // console.log(Items[Cat].articles[0])
-          Object.keys(Items[Cat].articles).map((obj) =>  <Picker.Item key = {obj} label = {Items[Cat].articles[obj]} value = {Items[Cat].articles[obj]}/>)
+          Object.keys(Items[Cat].articles).map((obj) =>  <Picker.Item key = {obj} color= '#fff' label = {Items[Cat].articles[obj]} value = {Items[Cat].articles[obj]}/>)
       )
+
+
 
         return (
             <View style = {styles.container} >
                 <Picker 
                     style = { styles.picker }
                     selectedValue = {this.state.cat}
-                    onValueChange = {(ItemValue,ItemIndex) => this.setState({cat:ItemValue})}
+                    onValueChange = {(cat) => this.setState({cat})}
                     placeHolder= 'choisis une categorie'>
 
 
@@ -88,16 +97,18 @@ calculateStep = () => {
                 <Picker
                     style = {styles.picker}
                     selectedValue = {this.state.object}
-                    onValueChange = {(ItemValue, ItemIndex) => this.setState({object:ItemValue})}>
+                    onValueChange = {(object ) => this.setState({object})}>
                     {Articles}
                 </Picker>
                 <NumericInput
-                    value = {this.state.value}
-                    onChange = {quantity => this.setState({quantity})}
+                    initValue = {this.state.quantity}
+                    value = {this.state.quantity}
+                    onChange = {value => this.handleChange({quantity:value})}
                     step = {1}
                     valueType = 'real'
                     minValue = {0}
-                    initValue = {0}/>
+                    color = '#fff'
+                    />
             </View>
         )
     }

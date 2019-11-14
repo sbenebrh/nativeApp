@@ -19,12 +19,15 @@ class Commande extends React.Component {
         date: new Date().toISOString().slice(0, 10),
         ClientId:"",
         items: [],
-        counter : 1
+        counter : 0
     };
 
 
     componentDidMount = () => {
         console.log('<Commande/> mon level => ' + this.props.level)
+        let items = this.state.items
+        items.push("0")
+        this.setState({items})
     }
 
 
@@ -98,12 +101,31 @@ class Commande extends React.Component {
     }
 
 
+    changeItem = (data, index = 0) => {
+        const items = this.state.items
+        items[index] = data
+
+        this.setState({items})
+    }
+
+    handlePress = () => {
+        let counter = this.state.counter
+        counter += 1
+        this.setState({counter})
+
+        let items = this.state.items
+        items.push("0")
+        this.setState({items})
+        
+    }
 
     render() {
+        console.log(this.state.items.length + " items")
+        console.log(this.state.items)
 
-        const afficheItems = () => {
-            Object.keys(this.state.items).map((key) => <Item key = {key} />)
-        }
+        const afficheItems = (
+            Object.keys(this.state.items).map((key) => <Item key = {this.state.counter} onchange = {(data, index) => {this.changeItem(data, index)}} index = {this.state.counter}/>)
+        )
 
         console.log(this.state.counter)
         if (this.state.isLoading === true) {
@@ -163,11 +185,11 @@ class Commande extends React.Component {
                                 onDateChange={(date) => { this.setState({ date }) }}
                             />
                         </View>
-                        <View style={styles.button}>
-                        <Button label ={'ajouter article'} onPress={() => {this.setState({counter:this.state.counter + 1})}}/>
+                        <View style = {styles.button}>
+                        <Button label = {'ajouter article'} onPress={() => this.handlePress()}/>
                         </View>
-                        
-                        {afficheItems()}
+                        {/*<Item index = {0} onchange = {(data) => this.changeItem(data)} />*/}
+                        {afficheItems}
                         <View style={styles.button}>
                             <Button label={'Nouvelle commande'} onPress={this.handleValidPress} />
                         </View>
