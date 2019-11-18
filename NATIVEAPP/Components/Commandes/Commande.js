@@ -1,25 +1,28 @@
 import React from 'react'
-import { StyleSheet, View, Text , FlatList} from 'react-native'
+import { StyleSheet, View, Text, Dimensions } from 'react-native'
 import { connect } from 'react-redux'
-import { Button, FormTextInput , Loading} from "../Common";
+import { Button, FormTextInput, Loading } from "../Common";
 import DatePicker from 'react-native-datepicker'
 import Item from './Item'
 
 import { withFirebase } from '../firebase';
+import { ScrollView } from 'react-native-gesture-handler';
 
+const { height } = Dimensions.get('window');
 
 class Commande extends React.Component {
 
     state = {
-        isLoading : false ,
+        isLoading: false,
         name: "",
         telephone: "",
-        lastname:"",
-        mail:"",
+        lastname: "",
+        mail: "",
         date: new Date().toISOString().slice(0, 10),
-        ClientId:"",
+        ClientId: "",
         items: [],
-        counter : 0
+        counter: 0,
+        screenHeight: 0,
     };
 
 
@@ -27,77 +30,81 @@ class Commande extends React.Component {
         console.log('<Commande/> mon level => ' + this.props.level)
         let items = this.state.items
         items.push("0")
-        this.setState({items})
+        this.setState({ items })
     }
 
 
     Additem = item => {
         const items = this.state.items
         items.push(item)
-        this.setState({items})
+        this.setState({ items })
     }
-    
+
     handleValidPress = () => {
         this.setState({ isLoading: true });
+        let items = this.state.items
+        items.pop()
+        this.setState({items})
 
-        const { name,  telephone, lastname, mail,  } = this.state
+        const { name, telephone, lastname, mail, } = this.state
         try {
 
             this.props.firebase.getDataBase()
-            .ref(`Clients`)
-            .orderByChild("telephone")
-            .equalTo(this.state.telephone)
-            .once('value',(snapshot) =>{
-                if(snapshot.val() !== null) {
-                    console.log("old Client")
-                    this.setState({
-                        isLoading: false,
-                        ClientId: telephone
-                    });
-                    
-                }
-                else {
-                    if(this.state.telephone !== ""){
-
-                    
-                    console.log("newClient")
-                    // console.log("second part")
-                    this.props.firebase.getDataBase()
-                    .ref(`Clients/${this.state.telephone}`)
-                    .set({
-                        name, lastname, telephone, mail
-                    })
-                    .then(() => {
-                        console.log(name + ' ' +  telephone + ' client insert ')
-                        this.setState({ 
+                .ref(`Clients`)
+                .orderByChild("telephone")
+                .equalTo(this.state.telephone)
+                .once('value', (snapshot) => {
+                    if (snapshot.val() !== null) {
+                        console.log("old Client")
+                        this.setState({
                             isLoading: false,
                             ClientId: telephone
                         });
-                        alert('Client Ajouter ' + name + ' '  + telephone)
-                    })
-                    .catch(error => {
-                        alert('Error1:', error.toString())
-                        this.setState({ isLoading: false });
-                    })
-                    
-                    }
-                    else{
-                        this.setState({
-                            isLoading:false
-                        });
-                }
-                
 
+                    }
+                    else {
+                        if (this.state.telephone !== "") {
+
+
+                            console.log("newClient")
+                            // console.log("second part")
+                            this.props.firebase.getDataBase()
+                                .ref(`Clients/${this.state.telephone}`)
+                                .set({
+                                    name, lastname, telephone, mail
+                                })
+                                .then(() => {
+                                    console.log(name + ' ' + telephone + ' client insert ')
+                                    this.setState({
+                                        isLoading: false,
+                                        ClientId: telephone
+                                    });
+                                    alert('Client Ajouter ' + name + ' ' + telephone)
+                                })
+                                .catch(error => {
+                                    alert('Error1:', error.toString())
+                                    this.setState({ isLoading: false });
+                                })
+
+                        }
+                        else {
+                            this.setState({
+                                isLoading: false
+                            });
+                        }
+
+
+                    }
                 }
-                }
-            )
-            
+                )
+
         } catch (error) {
             alert('Error2:', error.toString())
             this.setState({ isLoading: false });
         }
-    
- 
+        this.setState({items:null})
+
+
     }
 
 
@@ -105,29 +112,34 @@ class Commande extends React.Component {
         const items = this.state.items
         items[index] = data
 
-        this.setState({items})
+        this.setState({ items })
     }
 
     handlePress = () => {
         let counter = this.state.counter
         counter += 1
-        this.setState({counter})
+        this.setState({ counter })
 
         let items = this.state.items
         items.push("0")
-        this.setState({items})
-        
+        this.setState({ items })
+
+    }
+    onContentSizeChange = (contentWidth, contentHeight) => {
+        this.setState({screenHeight: contentHeight})
     }
 
     render() {
-        console.log(this.state.items.length + " items")
+        //console.log(this.state.items.length + " items")
         console.log(this.state.items)
 
         const afficheItems = (
-            Object.keys(this.state.items).map((key) => <Item key = {this.state.counter} onchange = {(data, index) => {this.changeItem(data, index)}} index = {this.state.counter}/>)
+            Object.keys(this.state.items).map((key) => <Item key={key} onchange={(data, index) => { this.changeItem(data, index) }} index={this.state.counter} />)
         )
 
-        console.log(this.state.counter)
+        const scrollEnabled = this.state.screenHeight > height;
+
+       // console.log(this.state.counter)
         if (this.state.isLoading === true) {
             return (
                 <View style={styles.container}>
@@ -138,62 +150,68 @@ class Commande extends React.Component {
             )
         } else {
             return (
-                
+
                 <View style={styles.container}>
                     <View style={styles.title}>
                         <Text style={styles.textTitle}>Passer Commande</Text>
                     </View>
-                    <FormTextInput
-                        value={this.state.name}
-                        placeholder = {'nom'}
-                        placeholderTextColor="#FFF"
-                        onChangeText={(name) => { this.setState({ name }) }}
-                    />
-                    <FormTextInput
-                        value={this.state.lastname}
-                        placeholder = {'prenom'}
-                        placeholderTextColor="#FFF"
-                        onChangeText={(lastname) => { this.setState({ lastname }) }}
-                    />
-                    <FormTextInput
-                    value={this.state.telephone}
-                    placeholder = {'telephone'}
-                    placeholderTextColor="#FFF"
-                    onChangeText={(telephone) => { this.setState({ telephone }) }}
-                    />
-                    <FormTextInput
-                        value={this.state.mail}
-                        placeholder = {'mail'}
-                        placeholderTextColor="#FFF"
-                        
-                        onChangeText={(mail) => { this.setState({ mail }) }}
-                    />
-                   
-                    <View style={styles.form}>
-                        <View style={styles.date}>
-                            <Text style={{ color: '#ffffff', fontSize: 14, }} >Date : </Text>
-                            <DatePicker
-                                style={{ width: 200, backgroundColor: '#fff' }}
-                                date={this.state.date}
-                                mode="date"
-                                placeholder="Selectionner la date"
-                                format="YYYY-MM-DD"
-                                minDate="2019-10-01"
-                                confirmBtnText="Confirm"
-                                cancelBtnText="Cancel"
+                    <ScrollView
+                        style={{ flex: 1 }}
+                        scrollEnabled={scrollEnabled}
+                        onContentSizeChange={this.onContentSizeChange}>
+                        <FormTextInput
+                            value={this.state.name}
+                            placeholder={'nom'}
+                            placeholderTextColor="#FFF"
+                            onChangeText={(name) => { this.setState({ name }) }}
+                        />
+                        <FormTextInput
+                            value={this.state.lastname}
+                            placeholder={'prenom'}
+                            placeholderTextColor="#FFF"
+                            onChangeText={(lastname) => { this.setState({ lastname }) }}
+                        />
+                        <FormTextInput
+                            value={this.state.telephone}
+                            placeholder={'telephone'}
+                            placeholderTextColor="#FFF"
+                            onChangeText={(telephone) => { this.setState({ telephone }) }}
+                        />
+                        <FormTextInput
+                            value={this.state.mail}
+                            placeholder={'mail'}
+                            placeholderTextColor="#FFF"
 
-                                onDateChange={(date) => { this.setState({ date }) }}
-                            />
+                            onChangeText={(mail) => { this.setState({ mail }) }}
+                        />
+
+                        <View style={styles.form}>
+                            <View style={styles.date}>
+                                <Text style={{ color: '#ffffff', fontSize: 14, }} >Date : </Text>
+                                <DatePicker
+                                    style={{ width: 200, backgroundColor: '#fff' }}
+                                    date={this.state.date}
+                                    mode="date"
+                                    placeholder="Selectionner la date"
+                                    format="YYYY-MM-DD"
+                                    minDate="2019-10-01"
+                                    confirmBtnText="Confirm"
+                                    cancelBtnText="Cancel"
+
+                                    onDateChange={(date) => { this.setState({ date }) }}
+                                />
+                            </View>
+                            {/*<Item index = {0} onchange = {(data) => this.changeItem(data)} />*/}
+                            {afficheItems}
+                            <View style={styles.button}>
+                                <Button label={'ajouter article'} onPress={() => this.handlePress()} />
+                            </View>
+                            <View style={styles.button}>
+                                <Button label={'Nouvelle commande'} onPress={this.handleValidPress} />
+                            </View>
                         </View>
-                        <View style = {styles.button}>
-                        <Button label = {'ajouter article'} onPress={() => this.handlePress()}/>
-                        </View>
-                        {/*<Item index = {0} onchange = {(data) => this.changeItem(data)} />*/}
-                        {afficheItems}
-                        <View style={styles.button}>
-                            <Button label={'Nouvelle commande'} onPress={this.handleValidPress} />
-                        </View>
-                    </View>
+                    </ScrollView>
+
                 </View>
             );
         }
@@ -202,7 +220,7 @@ class Commande extends React.Component {
 
 const styles = StyleSheet.create({
     container: {
-        flex:1,
+        flex: 1,
         backgroundColor: "#2f140d",
         alignItems: "stretch",
         justifyContent: "space-around"
@@ -223,7 +241,7 @@ const styles = StyleSheet.create({
     },
     title: {
         justifyContent: "center",
-        alignItems:"center"
+        alignItems: "center"
     },
     textTitle: {
         color: '#ffffff',

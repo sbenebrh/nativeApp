@@ -49,22 +49,40 @@ export default class Item extends Component {
     state = {
         quantity: 0,
         cat:'sucree',
-        object: ''
+        object: '',
+        index: 0
         
     }
 
-calculateStep = () => {
+    componentDidMount() {
+        console.log(`affichage de l index ${this.props.index}`)
+        this.setState({index:this.props.index})
+    }
+
+    calculateStep = () => {
     if(this.state.cat === 'sucree'){
         return 5
     }else {
         return 1
     }
 }
+    handleChangeCat = cat => {
+        this.setState({cat})
+        this.setState({object: '', quantity: 0})
+        this.props.onchange(this.state, this.state.index)
 
-handleChange = quantity => {
-    this.setState({quantity:quantity.quantity})
-    console.log(this.state.quantity )
-    this.props.onchange(this.state, this.props.index)
+    }
+
+    handleChangeObject = object => {
+        this.setState({object})
+        this.setState({quantity:0})
+        //this.props.onchange(this.state, this.state.index)
+    }
+
+    handleChange = quantity => {
+        this.setState({quantity:quantity.quantity})
+        //console.log(this.state.quantity )
+        this.props.onchange(this.state, this.state.index)
 }
 
     render() {
@@ -81,14 +99,12 @@ handleChange = quantity => {
           Object.keys(Items[Cat].articles).map((obj) =>  <Picker.Item key = {obj} color= '#fff' label = {Items[Cat].articles[obj]} value = {Items[Cat].articles[obj]}/>)
       )
 
-
-
         return (
             <View style = {styles.container} >
                 <Picker 
                     style = { styles.picker }
                     selectedValue = {this.state.cat}
-                    onValueChange = {(cat) => this.setState({cat})}
+                    onValueChange = {cat => this.setState({cat})}
                     placeHolder= 'choisis une categorie'>
 
 
@@ -97,7 +113,7 @@ handleChange = quantity => {
                 <Picker
                     style = {styles.picker}
                     selectedValue = {this.state.object}
-                    onValueChange = {(object ) => this.setState({object})}>
+                    onValueChange = {object  => this.handleChangeObject(object)}>
                     {Articles}
                 </Picker>
                 <NumericInput
