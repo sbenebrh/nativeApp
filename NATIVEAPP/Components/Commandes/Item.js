@@ -1,63 +1,54 @@
 import React, { Component} from 'react'
+
 import { StyleSheet, View, Picker } from 'react-native'
-import Button from '../Common/Button'
 import NumericInput from 'react-native-numeric-input'
 
-const Cat = {
-    cat1:'sucree',
-    cat2:'plateau',
-    cat3:'a garnir',
-    cat4:' viennoiserie'
-}
-
-const Items = {
-    'sucree': {
-        name: 'sucree',
-        articles:[        
-        'Mille-feuilles',
-        'Delice praline',
-        'Royal']
-
-    },
-    'plateau': {
-
-        name:'plateau',
-        articles:[
-        'pizza',
-        'fricases',
-        'chausson au thon'
-    ]},
-    'viennoiserie': {
-        name:'viennoiserie',
-        articles:[
-        'croissant',
-        'mini',
-        'raisins',
-        'chocolat'
-    ]},
-    'a garnir': {
-        name:'a garnir',
-        articles:[
-        'navette',
-        'pain de mie',
-        'pain surprise vide'
-    ]}
-}
+import { connect } from 'react-redux'
+import { withFirebase } from '../firebase';
 
 
-export default class Item extends Component {
+
+class Item extends Component {
     state = {
         quantity: 0,
         cat:'sucree',
-        object: '',
-        index: 0
+        object: 'coco passion',
+        index: 0,
+        cats:'',
+        items: '',
+        prix: 0,
         
     }
 
-    componentDidMount() {
-        console.log(`affichage de l index ${this.props.index}`)
-        this.setState({index:this.props.index})
+    constructor(props){
+        super(props)
+        this.ref = this.props.firebase.getDataBase().ref('/Cat').once('value').then((snapshot) => {
+            const cats = snapshot.val()
+            this.setState({cats});
+        }).catch(error => {
+            alert('Error1:', error.toString())
+            
+        })
+
+        this.ref2 = this.props.firebase.getDataBase().ref('/items').once('value').then( snapshot => {
+            const items = snapshot.val()
+            this.setState({items})
+        })
+        .catch(error => {
+            alert('Error2:', error.toString())
+        })
     }
+
+    async componentDidMount() {
+
+        //console.log(`affichage de l index ${this.props.index}`)
+        this.setState({index:this.props.index})
+        console.log(this.state.items)
+
+        
+        
+    }
+
 
     calculateStep = () => {
     if(this.state.cat === 'sucree'){
@@ -67,36 +58,54 @@ export default class Item extends Component {
     }
 }
     handleChangeCat = cat => {
-        this.setState({cat})
-        this.setState({object: '', quantity: 0})
-        this.props.onchange(this.state, this.state.index)
+        this.setState({cat:cat.cat})
+        const object = this.state.items[cat.cat].articles[Object.keys(this.state.items[cat.cat].articles)[0]].name
+        this.setState({object})
+        this.setState({ quantity: 0})
+
 
     }
 
     handleChangeObject = object => {
         this.setState({object})
         this.setState({quantity:0})
-        //this.props.onchange(this.state, this.state.index)
     }
 
     handleChange = quantity => {
         this.setState({quantity:quantity.quantity})
-        //console.log(this.state.quantity )
-        this.props.onchange(this.state, this.state.index)
+        const prix = quantity.quantity * this.state
+                                            .items[this.state.cat]
+                                            .articles[this.state.object]
+                                            .prix
+                                            
+        this.setState({prix})
+         
+        const data = {
+            cat:this.state.cat,
+            object:this.state.object,
+            prix:this.state.prix,
+            index:this.state.index,
+            quantity:this.state.quantity
+        };
+
+        this.props.onchange(data, this.state.index)
 }
 
+
+     
+
+
     render() {
+        const cats =  this.state.cats
+        const items = this.state.items
 
-      const  CatItem = (
-           
-            Object.keys(Items).map((obj) => <Picker.Item key = {obj} color= '#fff' label = {Items[obj].name} value = {Items[obj].name} />) 
-      )
-        
-      const Cat = this.state.cat
-
-      const Articles = (
-         // console.log(Items[Cat].articles[0])
-          Object.keys(Items[Cat].articles).map((obj) =>  <Picker.Item key = {obj} color= '#fff' label = {Items[Cat].articles[obj]} value = {Items[Cat].articles[obj]}/>)
+        const CatItem  =  cats ? Object.keys(cats).map((obj) => <Picker.Item key = {obj} color= '#fff' label = {cats[obj]} value = {cats[obj]} />) 
+                : null
+        const Cat = this.state.cat
+      
+        const Articles = (items[Cat] ?
+            Object.keys(items[Cat].articles).map((obj) =>  <Picker.Item key = {obj} color= '#fff' label = {items[Cat].articles[obj].name} value = {items[Cat].articles[obj].name}/>)
+            : null
       )
 
         return (
@@ -104,10 +113,8 @@ export default class Item extends Component {
                 <Picker 
                     style = { styles.picker }
                     selectedValue = {this.state.cat}
-                    onValueChange = {cat => this.setState({cat})}
-                    placeHolder= 'choisis une categorie'>
-
-
+                    onValueChange = {cat => this.handleChangeCat({cat})}
+                    placeHolder= 'choisir une categorie'>
                 {CatItem}
                 </Picker>
                 <Picker
@@ -123,7 +130,7 @@ export default class Item extends Component {
                     step = {1}
                     valueType = 'real'
                     minValue = {0}
-                    color = '#fff'
+                    style = {styles.input}
                     />
             </View>
         )
@@ -142,8 +149,19 @@ const styles = StyleSheet.create({
             width: '40%',
             color:'#fff',
             height:'40%'
+        },
+        input: {
+            color: '#fff'
         }
 
 
-})
 
+});
+
+const mapStateToProps = (state) => {
+    return {
+        level: state.level
+    }
+}
+
+export default connect(mapStateToProps)(withFirebase(Item))

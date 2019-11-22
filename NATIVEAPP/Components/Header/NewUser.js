@@ -121,7 +121,7 @@ class NewUser extends React.Component {
             </Picker>
           </View>
           <View style={styles.button}>
-            <Button label={'Ajouter Utulisateure'} onPress={this.handleRegisterPress} />
+            <Button label={'Ajouter Utilisateur'} onPress={this.handleRegisterPress} />
             <Button label={'Retour home'} onPress={() => this.props.navigation.replace('home')} />
           </View>
         </View>

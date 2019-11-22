@@ -52,7 +52,7 @@ class Firebase {
  removeBindingSyncState = (theRef) =>  this.base.removeBinding(theRef)
  getDataBase = () =>  this.db
 
-  
+  cat = () => this.db.collection('cat')
 
       
 
@@ -84,6 +84,8 @@ class Firebase {
 
 //   // *** Message API ***
 //   computers = () => this.db.collection('computers');
+
+
 
 }
 

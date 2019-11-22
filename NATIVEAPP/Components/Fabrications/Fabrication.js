@@ -19,53 +19,6 @@ import {
 } from '../Common'
 
 
-const commandes =  {
-  commande1:{
-    date:25/11/2019,
-    telephone: '015513.351',
-    magasin: 'crimee',
-    produits: {
-      produit1: {
-        cat:'plateaux',
-        objet:'fricasse',
-        quantite: 10
-      },
-      produit2: {
-        cat: 'plateaux',
-        objet: 'pizza',
-        quantite: '9'
-      },
-      produit3: {
-        cat:'sucree',
-        objet:'royal',
-        quantite: 10
-      }
-    }
-  }, 
-  commande2: {
-    date: 25/11/2019,
-    telephone:'054455445',
-    magasin: 'crimee',
-    produits: {
-      produit1: {
-        cat:'plateaux',
-        objet:'fricasse',
-        quantite: 10
-      },
-      produit2: {
-        cat: 'plateaux',
-        objet: 'pizza',
-        quantite: '9'
-      },
-      produit3: {
-        cat:'sucree',
-        objet:'royal',
-        quantite: 10
-      }
-    }
-  }
-}
-
 class Fabrication extends Component {
 
   constructor() {
@@ -115,7 +68,7 @@ class Fabrication extends Component {
 
   render() {
     const { isLoading, listDataSource, screen } = this.state
-    //console.log(this.state.listDataSource.SALE)
+    
     if (isLoading === true || listDataSource[screen] === undefined) {
       return (
         <View style={styles.container}>

@@ -1,5 +1,5 @@
 import React from 'react'
-import { StyleSheet, View, Text, Dimensions } from 'react-native'
+import { StyleSheet, View, Text, Dimensions, Picker } from 'react-native'
 import { connect } from 'react-redux'
 import { Button, FormTextInput, Loading } from "../Common";
 import DatePicker from 'react-native-datepicker'
@@ -14,105 +14,165 @@ class Commande extends React.Component {
 
     state = {
         isLoading: false,
+        clientId: "",
         name: "",
         telephone: "",
         lastname: "",
         mail: "",
+        mag: "",
         date: new Date().toISOString().slice(0, 10),
-        ClientId: "",
-        items: [],
+        
+        commande: [0],
         counter: 0,
         screenHeight: 0,
+        sucree:[],
+        salee:[],
+
     };
 
-
-    componentDidMount = () => {
-        console.log('<Commande/> mon level => ' + this.props.level)
-        let items = this.state.items
-        items.push("0")
-        this.setState({ items })
+    
+    componentDidMount() {
+            console.log('<Commande/> mon level => ' + this.props.level)
     }
 
+    separateCommandeIntoSaltedAndSugar(){
+        const commande = this.state.commande
 
-    Additem = item => {
-        const items = this.state.items
-        items.push(item)
-        this.setState({ items })
+        Object.keys(commande).forEach( article => {
+            if(commande[article].cat === 'sucree' || commande[article].cat === 'viennoiseries')
+            {
+                const sucree = this.state.sucree
+                sucree.push(commande[article])
+                this.setState({sucree})
+            }
+            else {
+                const salee = this.state.salee
+                salee.push(commande[article])
+                this.setState({salee})
+            }
+        })
+    }
+
+    deleteEmptyItem() {
+        
+        this.setState({ isLoading: true })
+        let commande = this.state.commande
+        if(commande[commande.length - 1] === 0)
+        {
+            commande.pop()
+        }
+        
+        this.setState({commande})
+    }
+
+    async createNewClientAndGetID() {
+        const { name, telephone, lastname, mail } = this.state
+
+        await this.props.firebase.getDataBase()
+            .ref(`Clients`)
+            .orderByChild("telephone")
+            .equalTo(this.state.telephone)
+            .once('value', (snapshot) => {
+                //old client
+                if (snapshot.val() !== null) {
+                    this.setState({
+                        isLoading: false,
+                        clientId: telephone
+                    });
+                }
+                else {
+                    if (telephone !== "") {
+                        this.props.firebase.getDataBase()
+                            .ref(`Clients/${telephone}`)
+                            .set({
+                                name, lastname, telephone, mail
+                            })
+                            .then(() => {
+                                this.setState({
+                                    isLoading: false,
+                                    clientId: telephone
+                                });
+                                console.log("telephone" + telephone)
+                            })
+                            .catch(error => {
+                                alert('Error1:', error.toString())
+                                this.setState({ isLoading: false });
+                            })
+                    }
+                    else {
+                        this.setState({
+                            isLoading: false
+                        });
+                    }
+                }
+            })
+            .catch(error => {
+                alert('Error: ', error.toString())
+                this.setState({ isLoading: false })
+            })
+            console.log("id" + this.state.clientId)
+    }
+
+    async createNewCommande() {
+
+        let {clientId, date, mag, sucree, salee} = this.state
+        //console.log(clientId)
+        clientId = this.state.telephone
+        const dDate = new Date().toISOString().slice(0, 10)
+
+        await this.props.firebase.getDataBase()
+            .ref(`commandes/${Date.now()}`)
+            .set({
+                clientId, dDate , date, mag, sucree, salee
+            })
+            .then(() => {
+                alert('commande ajouter')
+                this.setState({ isLoading: false });
+            })
+            .catch(error => {
+                alert('error: ', error.toString())
+            })
+    }
+
+    resetData() {
+        this.setState({
+            commande:[0],
+            isLoading: false,
+            name: "",
+            telephone: "",
+            lastname: "",
+            mail: "",
+            mag: "",
+            date: new Date().toISOString().slice(0, 10),
+            clientId: "",
+            counter: 0,
+            sucree:[],
+            salee:[],
+            });
     }
 
     handleValidPress = () => {
-        this.setState({ isLoading: true });
-        let items = this.state.items
-        items.pop()
-        this.setState({items})
 
-        const { name, telephone, lastname, mail, } = this.state
-        try {
-
-            this.props.firebase.getDataBase()
-                .ref(`Clients`)
-                .orderByChild("telephone")
-                .equalTo(this.state.telephone)
-                .once('value', (snapshot) => {
-                    if (snapshot.val() !== null) {
-                        console.log("old Client")
-                        this.setState({
-                            isLoading: false,
-                            ClientId: telephone
-                        });
-
-                    }
-                    else {
-                        if (this.state.telephone !== "") {
-
-
-                            console.log("newClient")
-                            // console.log("second part")
-                            this.props.firebase.getDataBase()
-                                .ref(`Clients/${this.state.telephone}`)
-                                .set({
-                                    name, lastname, telephone, mail
-                                })
-                                .then(() => {
-                                    console.log(name + ' ' + telephone + ' client insert ')
-                                    this.setState({
-                                        isLoading: false,
-                                        ClientId: telephone
-                                    });
-                                    alert('Client Ajouter ' + name + ' ' + telephone)
-                                })
-                                .catch(error => {
-                                    alert('Error1:', error.toString())
-                                    this.setState({ isLoading: false });
-                                })
-
-                        }
-                        else {
-                            this.setState({
-                                isLoading: false
-                            });
-                        }
-
-
-                    }
-                }
-                )
-
-        } catch (error) {
-            alert('Error2:', error.toString())
-            this.setState({ isLoading: false });
+        this.deleteEmptyItem()
+        if(this.state.commande === [])
+        {
+            return null
         }
-        this.setState({items:null})
 
+        this.separateCommandeIntoSaltedAndSugar()
 
+        this.createNewClientAndGetID()
+        this.createNewCommande()
+
+        this.resetData()
     }
 
 
     changeItem = (data, index = 0) => {
-        const items = this.state.items
-        items[index] = data
+        const commande = this.state.commande
+        commande[index] = data
 
-        this.setState({ items })
+        this.setState({ commande })
     }
 
     handlePress = () => {
@@ -120,21 +180,25 @@ class Commande extends React.Component {
         counter += 1
         this.setState({ counter })
 
-        let items = this.state.items
-        items.push("0")
-        this.setState({ items })
-
+        let commande = this.state.commande
+        commande.push("0")
+        this.setState({ commande })
     }
+
     onContentSizeChange = (contentWidth, contentHeight) => {
         this.setState({screenHeight: contentHeight})
     }
 
     render() {
+        
         //console.log(this.state.items.length + " items")
-        console.log(this.state.items)
+        //console.log(this.state.items)
 
         const afficheItems = (
-            Object.keys(this.state.items).map((key) => <Item key={key} onchange={(data, index) => { this.changeItem(data, index) }} index={this.state.counter} />)
+            Object.keys(this.state.commande).map((key) => <Item 
+                                                            key={key} 
+                                                            onchange={(data, index) => { this.changeItem(data, index) }} 
+                                                            index={this.state.counter} />)
         )
 
         const scrollEnabled = this.state.screenHeight > height;
@@ -157,7 +221,7 @@ class Commande extends React.Component {
                     </View>
                     <ScrollView
                         style={{ flex: 1 }}
-                        scrollEnabled={scrollEnabled}
+                        scrollEnabled ={ true }
                         onContentSizeChange={this.onContentSizeChange}>
                         <FormTextInput
                             value={this.state.name}
@@ -175,6 +239,9 @@ class Commande extends React.Component {
                             value={this.state.telephone}
                             placeholder={'telephone'}
                             placeholderTextColor="#FFF"
+                            autoCompleteType = 'tel'
+                            keyboardType = 'number-pad'
+                            required
                             onChangeText={(telephone) => { this.setState({ telephone }) }}
                         />
                         <FormTextInput
@@ -186,6 +253,17 @@ class Commande extends React.Component {
                         />
 
                         <View style={styles.form}>
+                        <Picker
+                            selectedValue = {this.state.mag}
+                            style = {styles.picker}
+                            onValueChange = {(itemValue, itemIndex) =>
+                                this.setState({ mag: itemValue })
+                            }>
+                            <Picker.Item label = 'Veuiller selectionner un magasin ...' value = '' color= '#fff'/>
+                            <Picker.Item label = "crimee" value = "crimee" color= '#fff' />
+                            <Picker.Item label = "petit" value = "petit" color= '#fff' />
+                            <Picker.Item label = "akol" value = "akol" color= '#fff' />
+                        </Picker>
                             <View style={styles.date}>
                                 <Text style={{ color: '#ffffff', fontSize: 14, }} >Date : </Text>
                                 <DatePicker
@@ -201,7 +279,8 @@ class Commande extends React.Component {
                                     onDateChange={(date) => { this.setState({ date }) }}
                                 />
                             </View>
-                            {/*<Item index = {0} onchange = {(data) => this.changeItem(data)} />*/}
+                        </View>
+                        <View style={ styles.commande } >
                             {afficheItems}
                             <View style={styles.button}>
                                 <Button label={'ajouter article'} onPress={() => this.handlePress()} />
@@ -231,7 +310,8 @@ const styles = StyleSheet.create({
         alignSelf: "center"
     },
     form: {
-        justifyContent: "center",
+        flexDirection :'row',
+        justifyContent: 'space-between',
         width: "80%"
     },
     button: {
@@ -250,8 +330,17 @@ const styles = StyleSheet.create({
     },
     date: {
         flexDirection: 'row',
-        justifyContent: "space-around"
-    }
+        justifyContent: "space-around",
+        alignItems:'center'
+    },
+    picker:{
+        width: '40%',
+        color:'#fff',
+    },
+    commande: {
+        justifyContent:'center',
+        width: '90%',
+    },
 });
 
 
