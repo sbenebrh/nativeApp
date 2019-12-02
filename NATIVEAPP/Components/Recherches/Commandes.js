@@ -2,10 +2,12 @@
 
 import React from 'react'
 
-import { StyleSheet, View, Text, FlatList , TouchableOpacity } from 'react-native'
-
+import { StyleSheet, View, Text, FlatList , TouchableOpacity} from 'react-native'
+import { withFirebase } from '../firebase'
+import { connect } from 'react-redux'
 
 import { Button } from '../Common'
+import Commande from './Commande'
 
 const Commandes = ({ commandes , handleReturn }) => {
     return (
@@ -17,7 +19,7 @@ const Commandes = ({ commandes , handleReturn }) => {
                 data={commandes}
                 keyExtractor={(item, index) => index.toString()}
                 renderItem={({ item, index }) =>
-                    <Commande commande={item}  />
+                    <Commande commande={item} />
                 }
             />
         </View>
@@ -25,21 +27,7 @@ const Commandes = ({ commandes , handleReturn }) => {
 }
 
 
-const Commande = ({ commande  }) => (
-    <TouchableOpacity onPress={() => console.log(commande)}>
-        <View style={styles.container}  >
-        <Text style={styles.description}  >  {commande.date}     </Text>
-            <View style={styles.main_container}>
-                <View style={flexDirection = 'row'}>
-                    <Text >
-                        <Text style={{ color: '#c71585' }}>  {commande.name} </Text>
-                    </Text>
-                    <Text style={styles.description}  >  {commande.telephone}     </Text>
-                </View>
-            </View>
-        </View>
-    </TouchableOpacity>
-)
+
 
 FlatListItemSeparator = () => {
     return (
@@ -83,5 +71,11 @@ const styles = StyleSheet.create({
   
   })
 
+const mapStateToProps = (state) => {
+    return {
+        level: state.level
+    }
+}
 
-export default (Commandes)
+export default connect(mapStateToProps)(withFirebase(Commandes))
+

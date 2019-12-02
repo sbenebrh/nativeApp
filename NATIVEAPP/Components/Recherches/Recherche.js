@@ -28,7 +28,7 @@ class Recherche extends React.Component {
     try {
 
       this.props.firebase.getDataBase().ref("commandes").orderByChild("date").equalTo(date).once("value", (snapshot) => {
-        console.log(snapshot.val())
+        
         if (snapshot.val() !== null) {
           var obj = snapshot.val()
           var result = Object.keys(obj).map(function (key) {
