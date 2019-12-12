@@ -25,6 +25,7 @@ class Recherche extends React.Component {
   handleValidPress = () => {
     this.setState({ isLoading: true });
     const { date } = this.state
+    i = 0;
     try {
 
       this.props.firebase.getDataBase().ref("commandes").orderByChild("date").equalTo(date).once("value", (snapshot) => {
@@ -32,6 +33,7 @@ class Recherche extends React.Component {
         if (snapshot.val() !== null) {
           var obj = snapshot.val()
           var result = Object.keys(obj).map(function (key) {
+            obj[key].name = (Object.keys(obj)[i++])
             return obj[key]
           });
           this.setState({
@@ -44,6 +46,7 @@ class Recherche extends React.Component {
             isLoading: false,
           });
         }
+         i = 0
 
       });
 

@@ -2,7 +2,7 @@
 
 import React from 'react'
 
-import { StyleSheet, View, Text, FlatList , TouchableOpacity} from 'react-native'
+import { StyleSheet, View, FlatList } from 'react-native'
 import { withFirebase } from '../firebase'
 import { connect } from 'react-redux'
 
@@ -19,7 +19,7 @@ const Commandes = ({ commandes , handleReturn }) => {
                 data={commandes}
                 keyExtractor={(item, index) => index.toString()}
                 renderItem={({ item, index }) =>
-                    <Commande commande={item} />
+                    <Commande commande={item} retour={handleReturn}/>
                 }
             />
         </View>
